@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+
+  airflow:
+    image: apache/airflow:2.7.2
+    restart: always
+    environment:
+      AIRFLOW_UID: 50000
+      AIRFLOW_CONFIG: /usr/local/airflow/airflow.cfg
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8080:8080"
+    volumes:
+      - airflow_data:/usr/local/airflow/dags
+      - airflow_logs:/usr/local/airflow/logs
+
+volumes:
+  airflow_postgres_data:
+  airflow_data:
+  airflow_logs:
